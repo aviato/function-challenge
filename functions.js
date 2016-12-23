@@ -94,38 +94,199 @@ function composeb(binOne, binTwo) {
 
 console.log(composeb(add, mul)(2, 3, 7));
 
+function limit(binary, callLimit) {
+  let calls = 0;
+  return function(first, second) {
+    if (calls < callLimit) {
+      calls += 1;
+      return binary(first, second);
+    }
+  }
+
+}
+
+const add_ltd = limit(add, 1);
+
+console.log(add_ltd(3, 4), add_ltd(3, 5));
+
+function from(start) {
+  return function() {
+    let result = start;
+    start += 1;
+    return result;
+  }
+}
+
+const index = from(0);
+
+console.log(index(), index(), index());
+
+function to(generator, limit) {
+  return function() {
+    let current = generator();
+    if (current < limit) {
+      return current;
+    }
+  }
+}
+
+let index1 = to(from(1), 3);
+
+console.log(index1(), index1(), index1());
 
 
+function fromTo(start, limit) {
+  return to(from(start), limit);
+}
+
+let index2 = fromTo(0, 3);
+
+console.log(index2(), index2(), index2(), index2());
+
+/*function element(array, generator) {
+  let index = generator ? generator : from(0);
+  return function() {
+    let current = index();
+    if (current !== undefined) {
+      return array[current];
+    }
+  }
+}*/
+
+function element(array, generator) {
+  if (generator === undefined) {
+    generator = fromTo(0, array.length);
+  }
+  return function() {
+    let index = generator();
+    if (index !== undefined) {
+      return array[index];
+    }
+  }
+}
+
+const ele = element(['a', 'b', 'c', 'd'], fromTo(1, 3));
+
+console.log('element tests: ', ele(), ele(), ele());
+
+const eleNoGen = element(['a', 'b', 'c', 'd']);
+
+console.log(
+  'eleNoGen tests: ',
+  eleNoGen(),
+  eleNoGen(),
+  eleNoGen(),
+  eleNoGen(),
+  eleNoGen()
+);
 
 
+function collect(generator, array) {
+  return function() {
+    let current = generator();
+    if (current !== undefined) {
+      array.push(current);
+    }
+    return current;
+  }
+}
 
+let collection = [],
+    col        = collect(fromTo(0, 2), collection);
 
+console.log(
+  'col test: ',
+  col(),
+  col(),
+  col(),
+  collection
+);
 
+function filter (generator, predicate) {
+  return function() {
+    let value;
+    do {
+      value = generator();
+    } while (
+      value !== undefined &&
+      !predicate(value)
+    );
+    return value;
+  }
+}
 
+function testThird (value) {
+  return (value % 3) === 0;
+}
 
+let fil = filter(fromTo(0, 5), testThird);
 
+console.log(
+  'filter tests: ',
+  fil(),
+  fil(),
+  fil()
+);
 
+function concat (genFirst, genSecond) {
+  return function() {
+    let value = genFirst();
+    if (value === undefined) {
+      value = genSecond();
+    }
+    return value;
+  }
+}
 
+// Doug's code
+/*function concat (gen1, gen2) {
+  let gen = gen1;
+  return function () {
+    let value = gen();
 
+    if (value !== undefined) {
+      return value;
+    }
 
+    gen = gen2;
+    return gen();
+  }
+}*/
 
+const con = concat(
+  fromTo(0, 3),
+  fromTo(0, 2)
+);
 
+console.log(
+  'testing con: ',
+  con(),
+  con(),
+  con(),
+  con(),
+  con(),
+  con()
+);
 
+const gensymf = char => {
+  let count = from(0);
+  return () => {
+    let current = count();
+    return `${char}${current}`;
+  }
+}
 
+let geng = gensymf('G'),
+    genh = gensymf('H');
 
+console.log(
+  'testing gensymf: ',
+  geng(),
+  genh(),
+  geng(),
+  genh()
+);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+const fibonaccif = (num1, num2) => {
+  return () => {}
+}
